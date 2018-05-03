@@ -29,6 +29,7 @@ import demeter.gabor.tracker.Util.Constants
 import demeter.gabor.tracker.adapters.UserAdapter
 import demeter.gabor.tracker.models.MyLocation
 import demeter.gabor.tracker.models.User
+import demeter.gabor.tracker.services.LocationService
 import org.json.JSONObject
 import java.io.DataOutputStream
 import java.io.IOException
@@ -114,8 +115,6 @@ class MainActivity : BaseActivity() {
 
         recyclerViewUsers!!.adapter = usersAdapter
 
-        startBtn = findViewById(R.id.startService)
-        stopBtn = findViewById(R.id.stopService)
 
 
         //INIT DATABASES CHANGES LISTENER
@@ -296,16 +295,16 @@ class MainActivity : BaseActivity() {
 
     private fun enable_buttons() {
 
-//        startBtn!!.setOnClickListener {
-//            val i = Intent(applicationContext, LocationService::class.java)
-//            startService(i)
-//            sendFCMNotificationToOthers()
-//        }
-//
-//        stopBtn!!.setOnClickListener {
-//            val i = Intent(applicationContext, LocationService::class.java)
-//            stopService(i)
-//        }
+        startBtn!!.setOnClickListener {
+            val i = Intent(applicationContext, LocationService::class.java)
+            startService(i)
+            sendFCMNotificationToOthers()
+        }
+
+        stopBtn!!.setOnClickListener {
+            val i = Intent(applicationContext, LocationService::class.java)
+            stopService(i)
+        }
 
     }
 

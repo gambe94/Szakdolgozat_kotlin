@@ -17,4 +17,5 @@
     <string name="authorization_key">key=AAAApDtEFJA:APA91bFLHDi4WdJEdIxTUkUN9iXtECqC9gyU4GTu5-h6-ZrHD93FufJXAu40h_wxmB331nvTx1SLciYZAc2BqPlzv4svAZMw8uXStTK82zg9WNA0bYm3j1-1RQSVKEm5eVvJpDpVyHIj</string>
     <string name="notificatoin_path">/topics/pushNotifications</string>
     <string name="unknown">Nem Ismert</string>
+    <string name="title_activity_user_map">Map</string>
 </resources>
