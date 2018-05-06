@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "705368954000",
+    "firebase_url": "https://szakdolgozat-93c21.firebaseio.com",
+    "project_id": "szakdolgozat-93c21",
+    "storage_bucket": "szakdolgozat-93c21.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:705368954000:android:4a388887fb09fe37",
+        "android_client_info": {
+          "package_name": "demeter.gabor.tracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "705368954000-145i0i0f0mjfo8ubbu30ilt37n240mek.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "demeter.gabor.tracker",
+            "certificate_hash": "13145ff8e1edb845cb82efc8e3e0f9e1d5cb886b"
+          }
+        },
+        {
+          "client_id": "705368954000-ldbfovvj7i04avhtlmujafbb555aevk1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDy-CJXo5esTU_wDpgOWQnDxvyF3XRHOa8"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "705368954000-ldbfovvj7i04avhtlmujafbb555aevk1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

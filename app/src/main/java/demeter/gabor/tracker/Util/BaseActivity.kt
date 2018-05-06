@@ -20,12 +20,11 @@ open class BaseActivity : AppCompatActivity() {
     private var mProgressDialog: ProgressDialog? = null
 
 
-    protected var mStorageRef: StorageReference? = null
-    protected var mImagesRefecence: StorageReference? = null
+    protected lateinit var mStorageRef: StorageReference
+    protected lateinit var mImagesRefecence: StorageReference
 
-
-    protected var mDatabase: DatabaseReference? = null
-    protected var mImages: DatabaseReference? = null
+    protected lateinit var mDatabase: DatabaseReference
+    protected lateinit var mImages: DatabaseReference
 
     protected val uid: String
         get() = FirebaseAuth.getInstance().currentUser!!.uid
@@ -69,7 +68,7 @@ open class BaseActivity : AppCompatActivity() {
         bitmapToUpload.compress(Bitmap.CompressFormat.JPEG, 100, baos)
         val data = baos.toByteArray()
 
-        val uploadTask = mImagesRefecence!!.child(uid).child(Constants.PROFILE_IMG).putBytes(data)
+        val uploadTask = mImagesRefecence.child(uid).child(Constants.PROFILE_IMG).putBytes(data)
         uploadTask.addOnFailureListener { exception ->
             // Handle unsuccessful uploads
             Log.e(TAG, exception.message)
@@ -78,7 +77,7 @@ open class BaseActivity : AppCompatActivity() {
             val downloadUrl = taskSnapshot.downloadUrl
             Toast.makeText(applicationContext, "Image Uploaded Successfully ", Toast.LENGTH_LONG).show()
 
-            mImages!!.child(uid).setValue(downloadUrl!!.toString())
+            mImages.child(uid).setValue(downloadUrl!!.toString())
         }
 
     }
