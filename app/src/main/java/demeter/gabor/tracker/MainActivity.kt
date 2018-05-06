@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Build
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
 import android.support.v4.content.ContextCompat
@@ -16,14 +15,12 @@ import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.widget.Button
-import android.widget.TextView
-import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
+import demeter.gabor.tracker.R.id.loginAs
 import demeter.gabor.tracker.Util.BaseActivity
 import demeter.gabor.tracker.Util.Constants
 import demeter.gabor.tracker.adapters.UserAdapter
@@ -35,34 +32,38 @@ import java.io.DataOutputStream
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
-import java.util.ArrayList
+import java.util.*
+
 
 class MainActivity : BaseActivity() {
 
 
-    private var startBtn: Button? = null
-    private var stopBtn: Button? = null
-    private var recyclerViewUsers: RecyclerView? = null
-    private var usersAdapter: UserAdapter? = null
-    private var tvLoginAs: TextView? = null
+
+    private lateinit var  recyclerViewUsers: RecyclerView
+    private lateinit var usersAdapter: UserAdapter
+
+
+    private lateinit var startBtn: Button
+    private lateinit var stopBtn: Button
 
     //Database reference manage Users
-    private var mUsersDatabase: DatabaseReference? = null
+    private lateinit var mUsersDatabase: DatabaseReference
 
     //Database reference manage Location
-    private var mLocationReference: DatabaseReference? = null
-    private var mLastKnownLocation: DatabaseReference? = null
-    private var mLastLocationQuery: Query? = null
+    private lateinit var mLocationReference: DatabaseReference
+    private lateinit var mLastKnownLocation: DatabaseReference
+    private lateinit var mLastLocationQuery: Query
 
 
     //EVENT Listenres
-    private var locationListener: ValueEventListener? = null
-    private var userListener: ChildEventListener? = null
-    private var loadLastknownLocation: ValueEventListener? = null
-    private var imagesListener: ChildEventListener? = null
-
+    private lateinit var locationListener: ValueEventListener
+    private lateinit var userListener: ChildEventListener
+    private lateinit var loadLastknownLocation: ValueEventListener
+    private lateinit var imagesListener: ChildEventListener
 
     private var isSaveLastData: Boolean = false
+
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,7 +78,8 @@ class MainActivity : BaseActivity() {
         mImages = FirebaseDatabase.getInstance().getReference(Constants.IMAGES_REF) //filed declared in baseActivity
 
 
-        mLastLocationQuery = mLocationReference!!.orderByKey().limitToLast(1)
+        mLastLocationQuery = mLocationReference.orderByKey().limitToLast(1)
+
 
 
         //CLOUD MESSAGING
@@ -95,7 +97,7 @@ class MainActivity : BaseActivity() {
 
         //STORRAGE REFERENCE
         mStorageRef = FirebaseStorage.getInstance().reference //filed declared in baseActivity
-        mImagesRefecence = mStorageRef!!.child(Constants.IMAGES_STORAGR_REF) //filed declared in baseActivity
+        mImagesRefecence = mStorageRef.child(Constants.IMAGES_STORAGR_REF) //filed declared in baseActivity
 
         //Create Listeners
         createUserListener()
@@ -103,17 +105,23 @@ class MainActivity : BaseActivity() {
         createImageListener()
 
         //SET VIEWS
-        tvLoginAs = findViewById(R.id.loginAs)
+
+
+        startBtn = findViewById<Button>(R.id.startService)
+        stopBtn = findViewById<Button>(R.id.stopService)
+
+        val viewManager = LinearLayoutManager(this).apply {
+            reverseLayout = true
+            stackFromEnd = true
+        }
 
         usersAdapter = UserAdapter(applicationContext)
-        recyclerViewUsers = findViewById(
-                R.id.recyclerViewUsers)
-        val layoutManager = LinearLayoutManager(this)
-        layoutManager.reverseLayout = true
-        layoutManager.stackFromEnd = true
-        recyclerViewUsers!!.layoutManager = layoutManager
+        recyclerViewUsers = findViewById<RecyclerView>(R.id.recyclerViewUsers).apply {
+            layoutManager = viewManager
+            adapter = usersAdapter
+        }
 
-        recyclerViewUsers!!.adapter = usersAdapter
+
 
 
 
@@ -122,7 +130,9 @@ class MainActivity : BaseActivity() {
 
 
         //INIT variables
-        tvLoginAs!!.text = FirebaseAuth.getInstance().currentUser!!.email
+
+        //loginAs.text = FirebaseAuth.getInstance().currentUser!!.email
+
         //CHECK PERMISSONS
         if (!runtime_permissions())
             enable_buttons()
@@ -134,7 +144,6 @@ class MainActivity : BaseActivity() {
 
         imagesListener = object : ChildEventListener {
             override fun onCancelled(error: DatabaseError?) {
-                //Toast.makeText(getApplicationContext(), error!!.details, Toast.LENGTH_LONG).show()
                 Log.d(TAG, "image Listener onCancelled")
             }
 
@@ -295,6 +304,9 @@ class MainActivity : BaseActivity() {
 
     private fun enable_buttons() {
 
+
+
+
         startBtn!!.setOnClickListener {
             val i = Intent(applicationContext, LocationService::class.java)
             startService(i)
@@ -426,3 +438,4 @@ class MainActivity : BaseActivity() {
 
 
 }
+

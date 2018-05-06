@@ -14,12 +14,14 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.bumptech.glide.Glide
 import demeter.gabor.tracker.R
+import demeter.gabor.tracker.UserMapActivity
 import demeter.gabor.tracker.Util.Constants
 import demeter.gabor.tracker.models.MyLocation
 import demeter.gabor.tracker.models.User
+import kotlinx.android.synthetic.main.user_item.view.*
 import java.util.*
 
-class UserAdapter(private val context: Context?) : RecyclerView.Adapter<UserAdapter.ViewHolder>() {
+class UserAdapter(private val context: Context) : RecyclerView.Adapter<UserAdapter.ViewHolder>() {
     private val userList: MutableList<User>
     private val userMap: MutableMap<String, User>
     private var lastPosition = -1
@@ -29,26 +31,7 @@ class UserAdapter(private val context: Context?) : RecyclerView.Adapter<UserAdap
         this.userMap = HashMap()
     }
 
-
-    class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        internal val tvUserName: TextView
-        internal val tvUserEmail: TextView
-        internal val tvLongitude: TextView
-        internal val tvLatitude: TextView
-        internal val tvAddress: TextView
-
-        internal val userProfileImage: ImageView
-
-
-        init {
-            tvUserName = itemView.findViewById(R.id.tvUserName)
-            tvUserEmail = itemView.findViewById(R.id.tvUserEmail)
-            tvLongitude = itemView.findViewById(R.id.tvLongitude)
-            tvLatitude = itemView.findViewById(R.id.tvLangitude)
-            tvAddress = itemView.findViewById(R.id.tvAddress)
-            userProfileImage = itemView.findViewById(R.id.userProfileImage)
-        }
-    }
+    class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView)
 
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): ViewHolder {
@@ -60,38 +43,37 @@ class UserAdapter(private val context: Context?) : RecyclerView.Adapter<UserAdap
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val tempUser = userList[position]
-        viewHolder.tvUserName.text = tempUser.username
-        viewHolder.tvUserEmail.text = tempUser.email
-
+        viewHolder.itemView.tvUserName.text = tempUser.username
+        viewHolder.itemView.tvUserEmail.text = tempUser.email
 
         if (tempUser.lastLocation == null) {
-            viewHolder.tvLongitude.setText(R.string.unknown)
-            viewHolder.tvLatitude.setText(R.string.unknown)
-            viewHolder.tvAddress.setText(R.string.unknown)
+            viewHolder.itemView.tvLongitude.text = context.getString(R.string.unknown)
+            viewHolder.itemView.tvLatitude.text = context.getString(R.string.unknown)
+            viewHolder.itemView.tvAddress.text = context.getString(R.string.unknown)
         } else {
-            viewHolder.tvLongitude.text = tempUser.lastLocation!!.longitude.toString()
-            viewHolder.tvLatitude.text = tempUser.lastLocation!!.latitude.toString()
-            viewHolder.tvAddress.text = getAddressFromMyLocation(tempUser)
+            viewHolder.itemView.tvLongitude.text = tempUser.lastLocation!!.longitude.toString()
+            viewHolder.itemView.tvLatitude.text = tempUser.lastLocation!!.latitude.toString()
+            viewHolder.itemView.tvAddress.text = getAddressFromMyLocation(tempUser)
         }
 
-//        viewHolder.itemView.setOnClickListener {
-//            if (context != null) {
-//                val showUserdata = Intent(context, UserMapsActivity::class.java)
-//                showUserdata.putExtra(Constants.LONGITUDE, tempUser.lastLocation!!.longitude)
-//                showUserdata.putExtra(Constants.LATITUDE, tempUser.lastLocation!!.latitude)
-//                showUserdata.putExtra(Constants.USERNAME, tempUser.username)
-//                showUserdata.putExtra(Constants.CURRENTUSER_UID, tempUser.getuId())
-//
-//                context.startActivity(showUserdata)
-//            }
-//        }
+        viewHolder.itemView.setOnClickListener {
+            if (context != null) {
+                val showUserdata = Intent(context, UserMapActivity::class.java)
+                showUserdata.putExtra(Constants.LONGITUDE, tempUser.lastLocation!!.longitude)
+                showUserdata.putExtra(Constants.LATITUDE, tempUser.lastLocation!!.latitude)
+                showUserdata.putExtra(Constants.USERNAME, tempUser.username)
+                showUserdata.putExtra(Constants.CURRENTUSER_UID, tempUser.getuId())
+
+                context.startActivity(showUserdata)
+            }
+        }
 
         //SET PROFILE IMAGE
         if (!TextUtils.isEmpty(tempUser.profileImageURL)) {
-            Glide.with(context).load(tempUser.profileImageURL).into(viewHolder.userProfileImage)
-            viewHolder.userProfileImage.visibility = View.VISIBLE
+            Glide.with(context).load(tempUser.profileImageURL).into(viewHolder.itemView.useProfileImageView)
+            viewHolder.itemView.useProfileImageView.visibility = View.VISIBLE
         } else {
-            viewHolder.userProfileImage.visibility = View.GONE
+            viewHolder.itemView.useProfileImageView.visibility = View.GONE
         }
 
         //setAnimation(viewHolder.itemView, position);
@@ -110,7 +92,6 @@ class UserAdapter(private val context: Context?) : RecyclerView.Adapter<UserAdap
     }
 
     fun updateLastLocation(myLocation: MyLocation?) {
-
 
         Log.d(TAG, "myLocation: " + myLocation.toString())
         Log.d(TAG, "UserMAP: " + userMap.toString())
