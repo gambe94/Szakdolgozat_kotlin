@@ -10,7 +10,6 @@ import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import demeter.gabor.tracker.R
-import demeter.gabor.tracker.UserMapActivity
 import demeter.gabor.tracker.Util.Constants
 import java.util.HashMap
 
@@ -44,8 +43,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     }
 
-    private fun sendNotification(title: String?, messageBody: String?, extras: HashMap<String, String?>) {
-        val intent = Intent(this, UserMapActivity::class.java)
+    private fun sendNotification(title: String?, messageBody: String?, extras: Map<String, String>) {
+        val intent = Intent(this, UserMapsActivity::class.java)
         for (key in extras.keys) {
             if (key === Constants.LATITUDE || key === Constants.LONGITUDE) {
                 intent.putExtra(key, java.lang.Double.parseDouble(extras[key]))

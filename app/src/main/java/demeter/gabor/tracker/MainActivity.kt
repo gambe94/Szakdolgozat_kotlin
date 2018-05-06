@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Build
+import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
 import android.support.v4.content.ContextCompat
@@ -15,12 +16,14 @@ import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.Button
+import android.widget.TextView
+import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
-import demeter.gabor.tracker.R.id.loginAs
 import demeter.gabor.tracker.Util.BaseActivity
 import demeter.gabor.tracker.Util.Constants
 import demeter.gabor.tracker.adapters.UserAdapter
@@ -32,38 +35,34 @@ import java.io.DataOutputStream
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
-import java.util.*
-
+import java.util.ArrayList
 
 class MainActivity : BaseActivity() {
 
 
-
-    private lateinit var  recyclerViewUsers: RecyclerView
-    private lateinit var usersAdapter: UserAdapter
-
-
-    private lateinit var startBtn: Button
-    private lateinit var stopBtn: Button
+    private var startBtn: Button? = null
+    private var stopBtn: Button? = null
+    private var recyclerViewUsers: RecyclerView? = null
+    private var usersAdapter: UserAdapter? = null
+    private var tvLoginAs: TextView? = null
 
     //Database reference manage Users
-    private lateinit var mUsersDatabase: DatabaseReference
+    private var mUsersDatabase: DatabaseReference? = null
 
     //Database reference manage Location
-    private lateinit var mLocationReference: DatabaseReference
-    private lateinit var mLastKnownLocation: DatabaseReference
-    private lateinit var mLastLocationQuery: Query
+    private var mLocationReference: DatabaseReference? = null
+    private var mLastKnownLocation: DatabaseReference? = null
+    private var mLastLocationQuery: Query? = null
 
 
     //EVENT Listenres
-    private lateinit var locationListener: ValueEventListener
-    private lateinit var userListener: ChildEventListener
-    private lateinit var loadLastknownLocation: ValueEventListener
-    private lateinit var imagesListener: ChildEventListener
+    private var locationListener: ValueEventListener? = null
+    private var userListener: ChildEventListener? = null
+    private var loadLastknownLocation: ValueEventListener? = null
+    private var imagesListener: ChildEventListener? = null
+
 
     private var isSaveLastData: Boolean = false
-
-
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,8 +77,7 @@ class MainActivity : BaseActivity() {
         mImages = FirebaseDatabase.getInstance().getReference(Constants.IMAGES_REF) //filed declared in baseActivity
 
 
-        mLastLocationQuery = mLocationReference.orderByKey().limitToLast(1)
-
+        mLastLocationQuery = mLocationReference!!.orderByKey().limitToLast(1)
 
 
         //CLOUD MESSAGING
@@ -97,7 +95,7 @@ class MainActivity : BaseActivity() {
 
         //STORRAGE REFERENCE
         mStorageRef = FirebaseStorage.getInstance().reference //filed declared in baseActivity
-        mImagesRefecence = mStorageRef.child(Constants.IMAGES_STORAGR_REF) //filed declared in baseActivity
+        mImagesRefecence = mStorageRef!!.child(Constants.IMAGES_STORAGR_REF) //filed declared in baseActivity
 
         //Create Listeners
         createUserListener()
@@ -105,34 +103,26 @@ class MainActivity : BaseActivity() {
         createImageListener()
 
         //SET VIEWS
-
-
-        startBtn = findViewById<Button>(R.id.startService)
-        stopBtn = findViewById<Button>(R.id.stopService)
-
-        val viewManager = LinearLayoutManager(this).apply {
-            reverseLayout = true
-            stackFromEnd = true
-        }
+        tvLoginAs = findViewById(R.id.loginAs)
 
         usersAdapter = UserAdapter(applicationContext)
-        recyclerViewUsers = findViewById<RecyclerView>(R.id.recyclerViewUsers).apply {
-            layoutManager = viewManager
-            adapter = usersAdapter
-        }
+        recyclerViewUsers = findViewById(
+                R.id.recyclerViewUsers)
+        val layoutManager = LinearLayoutManager(this)
+        layoutManager.reverseLayout = true
+        layoutManager.stackFromEnd = true
+        recyclerViewUsers!!.layoutManager = layoutManager
 
-
+        recyclerViewUsers!!.adapter = usersAdapter
 
 
 
         //INIT DATABASES CHANGES LISTENER
-        mUsersDatabase.addChildEventListener(userListener)
+        mUsersDatabase!!.addChildEventListener(userListener)
 
 
         //INIT variables
-
-        //loginAs.text = FirebaseAuth.getInstance().currentUser!!.email
-
+        tvLoginAs!!.text = FirebaseAuth.getInstance().currentUser!!.email
         //CHECK PERMISSONS
         if (!runtime_permissions())
             enable_buttons()
@@ -144,6 +134,7 @@ class MainActivity : BaseActivity() {
 
         imagesListener = object : ChildEventListener {
             override fun onCancelled(error: DatabaseError?) {
+                //Toast.makeText(getApplicationContext(), error!!.details, Toast.LENGTH_LONG).show()
                 Log.d(TAG, "image Listener onCancelled")
             }
 
@@ -154,12 +145,12 @@ class MainActivity : BaseActivity() {
             override fun onChildChanged(dataSnapshot: DataSnapshot?, p1: String?) {
                 Log.d(TAG, "imagelistener change: " + dataSnapshot.toString())
                 val imageURL = dataSnapshot!!.getValue(String::class.java)
-                usersAdapter.updateProfileImage(dataSnapshot.getKey(), imageURL!!)
+                usersAdapter!!.updateProfileImage(dataSnapshot.getKey(), imageURL!!)
             }
 
             override fun onChildAdded(dataSnapshot: DataSnapshot?, p1: String?) {
                 val imageURL = dataSnapshot!!.getValue(String::class.java)
-                usersAdapter.updateProfileImage(dataSnapshot.getKey(), imageURL!!)
+                usersAdapter!!.updateProfileImage(dataSnapshot.getKey(), imageURL!!)
             }
 
             override fun onChildRemoved(p0: DataSnapshot?) {
@@ -187,7 +178,7 @@ class MainActivity : BaseActivity() {
             override fun onChildAdded(dataSnapshot: DataSnapshot?, previousChildName: String?) {
                 val newUser = dataSnapshot?.getValue(User::class.java)
                 Log.d(TAG, "userListener :" + newUser!!.toString() + " key: " + dataSnapshot.key)
-                usersAdapter.addUser(newUser, dataSnapshot.key)
+                usersAdapter!!.addUser(newUser, dataSnapshot.key)
             }
 
             override fun onChildRemoved(dataSnapshot: DataSnapshot?) {
@@ -204,7 +195,7 @@ class MainActivity : BaseActivity() {
                 for (data in dataSnapshot.children) {
                     Log.d(TAG, "Location Query" + dataSnapshot.toString())
                     loc = data.getValue(MyLocation::class.java)
-                    usersAdapter.updateLastLocation(loc)
+                    usersAdapter!!.updateLastLocation(loc)
                 }
             }
 
@@ -248,9 +239,9 @@ class MainActivity : BaseActivity() {
         Log.d(TAG, "eletciklus  ONSART")
 
         //ADD DATABASES CHANGES LISTENER
-        mLastKnownLocation.addListenerForSingleValueEvent(loadLastknownLocation)
-        mLastLocationQuery.addValueEventListener(locationListener)
-        mImages.addChildEventListener(imagesListener)
+        mLastKnownLocation!!.addListenerForSingleValueEvent(loadLastknownLocation)
+        mLastLocationQuery!!.addValueEventListener(locationListener)
+        mImages!!.addChildEventListener(imagesListener)
 
 
     }
@@ -265,8 +256,8 @@ class MainActivity : BaseActivity() {
     override fun onStop() {
         super.onStop()
 
-        mLocationReference.removeEventListener(locationListener)
-        mLastKnownLocation.removeEventListener(loadLastknownLocation)
+        mLocationReference!!.removeEventListener(locationListener!!)
+        mLastKnownLocation!!.removeEventListener(loadLastknownLocation!!)
 
 
         saveLastLocation()
@@ -274,8 +265,8 @@ class MainActivity : BaseActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        mImages.removeEventListener(imagesListener!!)
-        mUsersDatabase.removeEventListener(userListener)
+        mImages!!.removeEventListener(imagesListener!!)
+        mUsersDatabase!!.removeEventListener(userListener!!)
 
         FirebaseMessaging.getInstance().unsubscribeFromTopic(Constants.PUSH_NOTIFICATIONS)
     }
@@ -304,16 +295,13 @@ class MainActivity : BaseActivity() {
 
     private fun enable_buttons() {
 
-
-
-
-        startBtn.setOnClickListener {
+        startBtn!!.setOnClickListener {
             val i = Intent(applicationContext, LocationService::class.java)
             startService(i)
             sendFCMNotificationToOthers()
         }
 
-        stopBtn.setOnClickListener {
+        stopBtn!!.setOnClickListener {
             val i = Intent(applicationContext, LocationService::class.java)
             stopService(i)
         }
@@ -341,7 +329,7 @@ class MainActivity : BaseActivity() {
 
                 val dataChield = JSONObject()
                 dataChield.put(Constants.CURRENTUSER_UID, uid)
-                val currentUser = usersAdapter.getUserbyId(uid)
+                val currentUser = usersAdapter!!.getUserbyId(uid)
                 dataChield.put(Constants.USERNAME, currentUser?.username)
                 dataChield.put(Constants.LATITUDE, currentUser?.lastLocation!!.latitude)
                 dataChield.put(Constants.LONGITUDE, currentUser?.lastLocation!!.longitude)
@@ -425,7 +413,7 @@ class MainActivity : BaseActivity() {
     private fun saveLastLocation() {
         Log.d(TAG, "saveLastLocation: $isSaveLastData")
         if (!isSaveLastData) {
-            mLastKnownLocation.child(uid).setValue(usersAdapter.getUserbyId(uid)!!.lastLocation)
+            mLastKnownLocation!!.child(uid).setValue(usersAdapter!!.getUserbyId(uid)!!.lastLocation)
             isSaveLastData = true
         }
 
@@ -438,4 +426,3 @@ class MainActivity : BaseActivity() {
 
 
 }
-
