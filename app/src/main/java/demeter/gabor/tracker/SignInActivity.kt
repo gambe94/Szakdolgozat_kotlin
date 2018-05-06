@@ -24,19 +24,21 @@ import com.google.firebase.storage.FirebaseStorage
 import demeter.gabor.tracker.Util.BaseActivity
 import demeter.gabor.tracker.Util.Constants
 import demeter.gabor.tracker.models.User
+import kotlinx.android.synthetic.main.activity_login.*
 import java.io.IOException
 
 class SignInActivity : BaseActivity(), View.OnClickListener {
 
-    private var mAuth: FirebaseAuth? = null
+    private lateinit var mAuth: FirebaseAuth
 
-    private var mEmailField: EditText? = null
-    private var mPasswordField: EditText? = null
-    private var mSignInButton: Button? = null
-    private var mSignUpButton: Button? = null
+    private lateinit var mEmailField: EditText
+    private lateinit var mPasswordField: EditText
+    private lateinit var mSignInButton: Button
+    private lateinit var mSignUpButton: Button
 
-    private var userProfileImage: ImageView? = null
-    private var userProfileImagePath: Uri? = null
+
+    private lateinit var userProfileImage: ImageView
+    private lateinit var userProfileImagePath: Uri
 
     private var isSelectedImage = false
 
@@ -49,27 +51,27 @@ class SignInActivity : BaseActivity(), View.OnClickListener {
         mDatabase = FirebaseDatabase.getInstance().reference //filed declared in baseActivity
         mAuth = FirebaseAuth.getInstance()
         mStorageRef = FirebaseStorage.getInstance().reference //filed declared in baseActivity
-        mImagesRefecence = mStorageRef!!.child(Constants.IMAGES_STORAGR_REF) //filed declared in baseActivity
+        mImagesRefecence = mStorageRef.child(Constants.IMAGES_STORAGR_REF) //filed declared in baseActivity
 
         // Views
-        mEmailField = findViewById(R.id.field_email)
-        mPasswordField = findViewById(R.id.field_password)
+        mEmailField = findViewById<EditText>(R.id.field_email)
+        mPasswordField = findViewById<EditText>(R.id.field_password)
         mSignInButton = findViewById(R.id.button_sign_in)
         mSignUpButton = findViewById(R.id.button_sign_up)
         userProfileImage = findViewById(R.id.userProfileImage)
 
         // Click listeners
-        mSignInButton!!.setOnClickListener(this)
-        mSignUpButton!!.setOnClickListener(this)
-        userProfileImage!!.setOnClickListener(this)
+        mSignInButton.setOnClickListener(this)
+        mSignUpButton.setOnClickListener(this)
+        userProfileImage.setOnClickListener(this)
     }
 
     public override fun onStart() {
         super.onStart()
 
         // Check auth on Activity start
-        if (mAuth!!.currentUser != null) {
-            onAuthSuccess(mAuth!!.currentUser!!)
+        if (mAuth.currentUser != null) {
+            onAuthSuccess(mAuth.currentUser!!)
         }
     }
 
@@ -80,19 +82,19 @@ class SignInActivity : BaseActivity(), View.OnClickListener {
         }
 
         showProgressDialog("Sign In ...")
-        val email = mEmailField!!.text.toString()
-        val password = mPasswordField!!.text.toString()
+        val email = field_email?.text.toString()
+        val password = field_password?.text.toString()
 
-        mAuth!!.signInWithEmailAndPassword(email, password)
+        mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this) { task ->
                     Log.d(TAG, "signIn:onComplete:" + task.isSuccessful)
                     hideProgressDialog()
 
+
                     if (task.isSuccessful) {
                         onAuthSuccess(task.result.user)
                     } else {
-                        Toast.makeText(this@SignInActivity, "Sign In Failed",
-                                Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@SignInActivity, "Sign In Failed",Toast.LENGTH_SHORT).show()
                     }
                 }
     }
@@ -104,19 +106,18 @@ class SignInActivity : BaseActivity(), View.OnClickListener {
         }
 
         showProgressDialog("Sign Up...")
-        val email = mEmailField!!.text.toString()
-        val password = mPasswordField!!.text.toString()
+        val email = field_email?.text.toString()
+        val password = field_password?.text.toString()
 
-        mAuth!!.createUserWithEmailAndPassword(email, password)
+        mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this) { task ->
                     Log.d(TAG, "createUser:onComplete:" + task.isSuccessful)
                     hideProgressDialog()
                     if (task.isSuccessful) {
                         if (isSelectedImage) {
-                            uploadImagetoFireBase(userProfileImage!!.drawingCache)
+                            uploadImagetoFireBase(userProfileImage.drawingCache)
+                            onAuthSuccess(task.result.user)
                         }
-
-                        onAuthSuccess(task.result.user)
                     } else {
                         Toast.makeText(this@SignInActivity, "Sign Up Failed",
                                 Toast.LENGTH_SHORT).show()
@@ -145,18 +146,18 @@ class SignInActivity : BaseActivity(), View.OnClickListener {
 
     private fun validateForm(): Boolean {
         var result = true
-        if (TextUtils.isEmpty(mEmailField!!.text.toString())) {
-            mEmailField!!.error = "Required"
+        if (TextUtils.isEmpty(mEmailField.text.toString())) {
+            mEmailField.error = "Required"
             result = false
         } else {
-            mEmailField!!.error = null
+            mEmailField.error = null
         }
 
-        if (TextUtils.isEmpty(mPasswordField!!.text.toString())) {
-            mPasswordField!!.error = "Required"
+        if (TextUtils.isEmpty(mPasswordField.text.toString())) {
+            mPasswordField.error = "Required"
             result = false
         } else {
-            mPasswordField!!.error = null
+            mPasswordField.error = null
         }
 
         return result
@@ -166,7 +167,7 @@ class SignInActivity : BaseActivity(), View.OnClickListener {
     private fun writeNewUser(userId: String, name: String, email: String?) {
 
         val user = User(name, email!!, userId)
-        mDatabase!!.child(Constants.USERS_REF).child(userId).setValue(user)
+        mDatabase.child(Constants.USERS_REF).child(userId).setValue(user)
     }
 
 
@@ -183,10 +184,10 @@ class SignInActivity : BaseActivity(), View.OnClickListener {
                 e.printStackTrace()
             }
 
-            userProfileImage!!.setImageBitmap(bitmap)
+            userProfileImage.setImageBitmap(bitmap)
 
-            userProfileImage!!.isDrawingCacheEnabled = true
-            userProfileImage!!.buildDrawingCache()
+            userProfileImage.isDrawingCacheEnabled = true
+            userProfileImage.buildDrawingCache()
             isSelectedImage = true
         }
     }

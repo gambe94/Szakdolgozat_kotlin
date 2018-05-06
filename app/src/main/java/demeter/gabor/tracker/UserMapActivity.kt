@@ -21,22 +21,23 @@ import java.util.*
 class UserMapActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
-    private var mMap: GoogleMap? = null
+    private lateinit var mMap: GoogleMap
 
 
-    private var mLocationReference: DatabaseReference? = null
-    private var mLastKnownLocation: DatabaseReference? = null
+    private lateinit var mLocationReference: DatabaseReference
+    private lateinit var mLastKnownLocation: DatabaseReference
 
-    private var mLastLocationQuery: Query? = null
+    private  lateinit var mLastLocationQuery: Query
 
-    private var locationLisener: ValueEventListener? = null
-    private var currentLongitude: Double? = null
-    private var currentLatitude: Double? = null
-    private var username: String? = null
-    private var uId: String? = null
+    private lateinit var locationLisener: ValueEventListener
+
+    private lateinit var uId: String
+    private lateinit var username: String
+    private  var currentLongitude: Double? = null
+    private  var currentLatitude: Double? = null
 
     private var position = 0
-    private var markers: Stack<MarkerOptions>? = null
+    private lateinit var markers: Stack<MarkerOptions>
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,14 +55,14 @@ class UserMapActivity : AppCompatActivity(), OnMapReadyCallback {
         mLocationReference = FirebaseDatabase.getInstance().getReference(Constants.LOCATIONS_REF)
         mLastKnownLocation = FirebaseDatabase.getInstance().getReference(Constants.LAST_KNOWN_LOCATIONS_REF)
 
-        mLastLocationQuery = mLocationReference!!.orderByKey().limitToLast(1)
+        mLastLocationQuery = mLocationReference.orderByKey().limitToLast(1)
 
 
         markers = Stack()
 
         //Create Listeners
         createLocationListerner()
-        mLastLocationQuery!!.addValueEventListener(locationLisener)
+        mLastLocationQuery.addValueEventListener(locationLisener)
     }
 
     override fun onStart() {
@@ -86,13 +87,12 @@ class UserMapActivity : AppCompatActivity(), OnMapReadyCallback {
 
                     Log.d(TAG, "Location loc" + loc.toString())
                     Log.d(TAG, "uid " + uId.toString())
-                    if (loc != null && uId == loc.userId && mMap != null) {
-                        mMap!!.clear()
+
+                    if (loc != null && uId == loc.userId) {
+                        mMap.clear()
                         animateMarker(position++, LatLng(currentLatitude!!, currentLongitude!!), LatLng(loc.latitude!!, loc.longitude!!), false)
                         currentLongitude = loc.longitude
                         currentLatitude = loc.latitude
-
-
                     }
                 }
 
@@ -120,16 +120,14 @@ class UserMapActivity : AppCompatActivity(), OnMapReadyCallback {
 
         val currentUserPosition = LatLng(currentLatitude!!, currentLongitude!!)
 
-        mMap!!.addMarker(MarkerOptions().position(currentUserPosition).title(username))
-        mMap!!.moveCamera(CameraUpdateFactory.newLatLng(currentUserPosition))
-
+        mMap.addMarker(MarkerOptions().position(currentUserPosition).title(username))
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(currentUserPosition))
 
     }
 
 
     //This methos is used to move the marker of each car smoothly when there are any updates of their position
-    private fun animateMarker(position: Int, startPosition: LatLng, toPosition: LatLng,
-                              hideMarker: Boolean) {
+    private fun animateMarker(position: Int, startPosition: LatLng, toPosition: LatLng,  hideMarker: Boolean) {
 
 
         val myMarker = MarkerOptions()
@@ -137,12 +135,12 @@ class UserMapActivity : AppCompatActivity(), OnMapReadyCallback {
                 .title(username)
 
 
-        if (!markers!!.isEmpty()) {
-            markers!!.pop().visible(false)
+        if (!markers.isEmpty()) {
+            markers.pop().visible(false)
         }
-        markers!!.push(myMarker)
-        mMap!!.clear()
-        val marker = mMap!!.addMarker(myMarker)
+        markers.push(myMarker)
+        mMap.clear()
+        val marker = mMap.addMarker(myMarker)
 
 
         val handler = Handler()
@@ -158,17 +156,13 @@ class UserMapActivity : AppCompatActivity(), OnMapReadyCallback {
                 val lng = t * toPosition.longitude + (1 - t) * startPosition.longitude
                 val lat = t * toPosition.latitude + (1 - t) * startPosition.latitude
                 val newPosition = LatLng(lat, lng)
-                marker.setPosition(newPosition)
-                mMap!!.moveCamera(CameraUpdateFactory.newLatLng(newPosition))
+                marker.position = newPosition
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(newPosition))
                 if (t < 1.0) {
                     // Post again 16ms later.
                     handler.postDelayed(this, 16)
                 } else {
-                    if (hideMarker) {
-                        marker.isVisible = false
-                    } else {
-                        marker.isVisible = true
-                    }
+                    marker.isVisible = !hideMarker
                 }
             }
         })
@@ -178,8 +172,8 @@ class UserMapActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onPause() {
         super.onPause()
         Log.d(TAG, "eletciklus ONPAUSE")
-        mLastLocationQuery!!.removeEventListener(locationLisener!!)
-        mLastKnownLocation!!.child(uId!!).setValue(MyLocation(this.currentLatitude, this.currentLongitude, uId!!))
+        mLastLocationQuery.removeEventListener(locationLisener)
+        mLastKnownLocation.child(uId).setValue(MyLocation(this.currentLatitude, this.currentLongitude, uId))
     }
 
     override fun onStop() {

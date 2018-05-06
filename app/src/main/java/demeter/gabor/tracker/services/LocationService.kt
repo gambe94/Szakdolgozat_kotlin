@@ -19,12 +19,12 @@ import demeter.gabor.tracker.models.MyLocation
 
 class LocationService : Service() {
 
-    private var listener: LocationListener? = null
-    private var locationManager: LocationManager? = null
-    private var mAuth: FirebaseAuth? = null
-    private var currentUser: FirebaseUser? = null
-    private var database: FirebaseDatabase? = null
-    private var locationsReference: DatabaseReference? = null
+    private lateinit var listener: LocationListener
+    private lateinit var locationManager: LocationManager
+    private lateinit var mAuth: FirebaseAuth
+    private lateinit var currentUser: FirebaseUser
+    private lateinit var database: FirebaseDatabase
+    private lateinit var locationsReference: DatabaseReference
 
     override fun onBind(intent: Intent): IBinder? {
         return null
@@ -34,18 +34,14 @@ class LocationService : Service() {
     override fun onCreate() {
 
         mAuth = FirebaseAuth.getInstance()
-        currentUser = mAuth!!.currentUser
+        currentUser = mAuth.currentUser!!
 
         database = FirebaseDatabase.getInstance()
-        locationsReference = database!!.getReference(Constants.LOCATIONS_REF)
+        locationsReference = database.getReference(Constants.LOCATIONS_REF)
 
         listener = object : LocationListener {
             override fun onLocationChanged(location: Location) {
-
-
-                if (currentUser != null) {
-                    writeLocatoinToFirebase(location)
-                }
+                writeLocatoinToFirebase(location)
             }
 
             override fun onStatusChanged(s: String, i: Int, bundle: Bundle) {
@@ -66,20 +62,18 @@ class LocationService : Service() {
         locationManager = applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
 
-        locationManager!!.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 200f, listener)
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 200f, listener)
 
     }
 
 
     override fun onDestroy() {
         super.onDestroy()
-        if (locationManager != null) {
+        locationManager.removeUpdates(listener)
 
-            locationManager!!.removeUpdates(listener)
-        }
     }
 
     private fun writeLocatoinToFirebase(location: Location) {
-        locationsReference!!.push().setValue(MyLocation(location, currentUser!!.uid))
+        locationsReference.push().setValue(MyLocation(location, currentUser.uid))
     }
 }

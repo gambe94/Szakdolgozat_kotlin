@@ -106,7 +106,7 @@ class UserAdapter(private val context: Context) : RecyclerView.Adapter<UserAdapt
 
     fun updateLastLocation(locations: List<MyLocation>) {
         for (loc in locations) {
-            if (loc != null && userMap.containsKey(loc.userId)) {
+            if (userMap.containsKey(loc.userId)) {
                 userMap[loc.userId]?.lastLocations = loc
 
             }

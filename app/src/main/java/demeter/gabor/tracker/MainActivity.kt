@@ -126,7 +126,7 @@ class MainActivity : BaseActivity() {
 
 
         //INIT DATABASES CHANGES LISTENER
-        mUsersDatabase!!.addChildEventListener(userListener)
+        mUsersDatabase.addChildEventListener(userListener)
 
 
         //INIT variables
@@ -154,12 +154,12 @@ class MainActivity : BaseActivity() {
             override fun onChildChanged(dataSnapshot: DataSnapshot?, p1: String?) {
                 Log.d(TAG, "imagelistener change: " + dataSnapshot.toString())
                 val imageURL = dataSnapshot!!.getValue(String::class.java)
-                usersAdapter!!.updateProfileImage(dataSnapshot.getKey(), imageURL!!)
+                usersAdapter.updateProfileImage(dataSnapshot.getKey(), imageURL!!)
             }
 
             override fun onChildAdded(dataSnapshot: DataSnapshot?, p1: String?) {
                 val imageURL = dataSnapshot!!.getValue(String::class.java)
-                usersAdapter!!.updateProfileImage(dataSnapshot.getKey(), imageURL!!)
+                usersAdapter.updateProfileImage(dataSnapshot.getKey(), imageURL!!)
             }
 
             override fun onChildRemoved(p0: DataSnapshot?) {
@@ -187,7 +187,7 @@ class MainActivity : BaseActivity() {
             override fun onChildAdded(dataSnapshot: DataSnapshot?, previousChildName: String?) {
                 val newUser = dataSnapshot?.getValue(User::class.java)
                 Log.d(TAG, "userListener :" + newUser!!.toString() + " key: " + dataSnapshot.key)
-                usersAdapter!!.addUser(newUser, dataSnapshot.key)
+                usersAdapter.addUser(newUser, dataSnapshot.key)
             }
 
             override fun onChildRemoved(dataSnapshot: DataSnapshot?) {
@@ -204,7 +204,7 @@ class MainActivity : BaseActivity() {
                 for (data in dataSnapshot.children) {
                     Log.d(TAG, "Location Query" + dataSnapshot.toString())
                     loc = data.getValue(MyLocation::class.java)
-                    usersAdapter!!.updateLastLocation(loc)
+                    usersAdapter.updateLastLocation(loc)
                 }
             }
 
@@ -248,9 +248,9 @@ class MainActivity : BaseActivity() {
         Log.d(TAG, "eletciklus  ONSART")
 
         //ADD DATABASES CHANGES LISTENER
-        mLastKnownLocation!!.addListenerForSingleValueEvent(loadLastknownLocation)
-        mLastLocationQuery!!.addValueEventListener(locationListener)
-        mImages!!.addChildEventListener(imagesListener)
+        mLastKnownLocation.addListenerForSingleValueEvent(loadLastknownLocation)
+        mLastLocationQuery.addValueEventListener(locationListener)
+        mImages.addChildEventListener(imagesListener)
 
 
     }
@@ -265,8 +265,8 @@ class MainActivity : BaseActivity() {
     override fun onStop() {
         super.onStop()
 
-        mLocationReference!!.removeEventListener(locationListener!!)
-        mLastKnownLocation!!.removeEventListener(loadLastknownLocation!!)
+        mLocationReference.removeEventListener(locationListener)
+        mLastKnownLocation.removeEventListener(loadLastknownLocation)
 
 
         saveLastLocation()
@@ -274,8 +274,8 @@ class MainActivity : BaseActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        mImages!!.removeEventListener(imagesListener!!)
-        mUsersDatabase!!.removeEventListener(userListener!!)
+        mImages.removeEventListener(imagesListener!!)
+        mUsersDatabase.removeEventListener(userListener)
 
         FirebaseMessaging.getInstance().unsubscribeFromTopic(Constants.PUSH_NOTIFICATIONS)
     }
@@ -307,13 +307,13 @@ class MainActivity : BaseActivity() {
 
 
 
-        startBtn!!.setOnClickListener {
+        startBtn.setOnClickListener {
             val i = Intent(applicationContext, LocationService::class.java)
             startService(i)
             sendFCMNotificationToOthers()
         }
 
-        stopBtn!!.setOnClickListener {
+        stopBtn.setOnClickListener {
             val i = Intent(applicationContext, LocationService::class.java)
             stopService(i)
         }
@@ -341,7 +341,7 @@ class MainActivity : BaseActivity() {
 
                 val dataChield = JSONObject()
                 dataChield.put(Constants.CURRENTUSER_UID, uid)
-                val currentUser = usersAdapter!!.getUserbyId(uid)
+                val currentUser = usersAdapter.getUserbyId(uid)
                 dataChield.put(Constants.USERNAME, currentUser?.username)
                 dataChield.put(Constants.LATITUDE, currentUser?.lastLocation!!.latitude)
                 dataChield.put(Constants.LONGITUDE, currentUser?.lastLocation!!.longitude)
@@ -425,7 +425,7 @@ class MainActivity : BaseActivity() {
     private fun saveLastLocation() {
         Log.d(TAG, "saveLastLocation: $isSaveLastData")
         if (!isSaveLastData) {
-            mLastKnownLocation!!.child(uid).setValue(usersAdapter!!.getUserbyId(uid)!!.lastLocation)
+            mLastKnownLocation.child(uid).setValue(usersAdapter.getUserbyId(uid)!!.lastLocation)
             isSaveLastData = true
         }
 
